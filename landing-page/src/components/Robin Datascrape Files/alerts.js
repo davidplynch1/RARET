@@ -3,8 +3,9 @@ const $ = require('cheerio')
 const snoho = 'http://www.snoco.org/App4/SPW/PWApp/roads/emclosure/index.html';
 const king = 'https://gismaps.kingcounty.gov/MyCommute/rss.aspx';
 
-function snohomishAlerts() {
-  rp(snoho)
+
+export function snohomishAlerts() {
+  return rp(snoho)
   .then(function(html){
     // Grab table of closures and size of table
     let table = $('table > tbody > tr > td > table > tbody > tr > td > table > tbody > tr > td > div > div > div > table > tbody > tr', html);
@@ -39,24 +40,30 @@ function snohomishAlerts() {
         }
     }
 
-    // Consolidate names and times into a single dictionary
-    // Keys are road names and values are are the time dictionary
-    let dict = {};
+    // Consolidate names and times into an array of objects
+    let arr = [];
     for (let i = 0; i < names.length; i++) {
-        dict[names[i]] = times[i];
+        arr[i] = {"name": names[i], "info": times[i]};
     }
+    // console.log(dict);
 
-    return {
-        dict
-    }
+    // return dict;
+
+    return { 
+      arr
+    };
   })
   .catch(function(err){
     console.log("Error Retrieving Data from Snohomish County Alerts")
   });
+
+  // return object;
 }
 
-function kingAlerts() {
-  rp(king)
+const proxyurl = "https://cors-anywhere.herokuapp.com/"
+
+export function kingAlerts() {
+  return rp(proxyurl + king)
   .then(function(html){
 
     // Grab XML items
@@ -75,16 +82,16 @@ function kingAlerts() {
       info.push(line);
     }
 
-    // Consolidate names and info into a single dictionary
-    // Keys are road names and values are the info dictionary
-    let dict = {};
+    // Consolidate names and info into an array of objects
+    let arr = [];
     for (let i = 0; i < names.length; i++) {
-        dict[names[i]] = info[i];
+      arr[i] = {"name": names[i], "info": info[i]}
     }
-
-    return {
-      dict
-    }
+    // console.log(dict);
+    // return {
+    //   dict
+    // }
+    return arr;
   })
   .catch(function(err){
     console.log("Error Retrieving Data from King County Alerts")
